@@ -1,0 +1,105 @@
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 158, 0, 110)
+mainFrame.Position = UDim2.new(0.5, -79, 0.5, -55)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.BackgroundTransparency = 0.5
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+mainFrame.Draggable = true
+mainFrame.Active = true
+mainFrame.Parent = screenGui
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.Text = "Touch Fling"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+title.BackgroundTransparency = 1
+title.BorderSizePixel = 0
+title.Font = Enum.Font.Sarpanch
+title.TextSize = 20
+title.TextXAlignment = Enum.TextXAlignment.Center
+title.TextStrokeTransparency = 0
+title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+title.Parent = mainFrame
+
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.Text = "X"
+closeButton.TextColor3 = Color3.fromRGB(255, 0, 0)
+closeButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+closeButton.BackgroundTransparency = 1
+closeButton.BorderSizePixel = 0
+closeButton.Font = Enum.Font.SourceSansBold
+closeButton.TextSize = 20
+closeButton.AutoButtonColor = false
+closeButton.TextStrokeTransparency = 0
+closeButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+closeButton.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+closeButton.Parent = mainFrame
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 100, 0, 50)
+toggleButton.Position = UDim2.new(0.5, -50, 0.5, -20)
+toggleButton.Text = "OFF"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+toggleButton.BackgroundTransparency = 0.5
+toggleButton.BorderSizePixel = 1
+toggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextSize = 20
+toggleButton.AutoButtonColor = false
+toggleButton.TextStrokeTransparency = 0
+toggleButton.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+
+local isToggled = false
+local flingThread = nil
+local hiddenfling = false
+
+local function fling()
+    local lp = game.Players.LocalPlayer
+    local c, hrp, vel, movel = nil, nil, nil, 0.1
+
+    while hiddenfling do
+        game:GetService("RunService").Heartbeat:Wait()
+        c = lp.Character
+        hrp = c and c:FindFirstChild("HumanoidRootPart")
+
+        if hrp then
+            vel = hrp.Velocity
+            hrp.Velocity = vel * 10000 + Vector3.new(0, 10000, 0)
+            game:GetService("RunService").RenderStepped:Wait()
+            hrp.Velocity = vel
+            game:GetService("RunService").Stepped:Wait()
+            hrp.Velocity = vel + Vector3.new(0, movel, 0)
+            movel = -movel
+        end
+    end
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+    isToggled = not isToggled
+    if isToggled then
+        toggleButton.Text = "ON"
+        toggleButton.TextColor3 = Color3.fromRGB(0, 255, 0)
+        hiddenfling = true
+        flingThread = coroutine.create(fling)
+        coroutine.resume(flingThread)
+    else
+        toggleButton.Text = "OFF"
+        toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        hiddenfling = false
+    end
+end)
+
+toggleButton.Parent = mainFrame
